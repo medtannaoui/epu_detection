@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Detection</title>
+	<link rel="shortcut icon" type="image/jpg" href="https://cdn-icons-png.freepik.com/256/4768/4768801.png?ga=GA1.1.1617529639.1666296958&semt=ais"/>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Calibri, sans-serif;
+        }
+        
+
+        #dashboard {
+          display: flex;
+          background-color: #AEBDCA;
+          color: #212121;
+          padding: 0px 20px;
+          text-align: right;
+          font-size: 32px; /* Adjust the font size as needed */
+        }
+
+        #dashboard h2 {
+            padding: 10px;
+            display: flex;
+            align-items: center; /* Align items vertically in the center */
+        }
+
+        #dashboard h2 img {
+            margin-right: 16px; /* Adjust the margin as needed */
+            width: 70px; /* Adjust the width of the icon */
+            height: 70px; /* Adjust the height of the icon */
+        }
+
+        #content {
+            display: flex;
+            padding: 20px;
+        }
+
+        #video, #information {
+            width: 50%; /* Make both blocks take half of the width */
+            padding: 10px;
+            background-color: #eee;
+            margin-right: 10px; /* Add some spacing between blocks */
+        }
+
+        #person_without_epi_images {
+            display: flex;
+            flex-wrap: wrap; /* Allow images to wrap to the next line if they don't fit */
+        }
+
+        .person_image {
+            max-width: 100px; /* Limit the maximum width of each image */
+            margin: 5px; /* Add some spacing between images */
+        }
+
+        .go-back-btn {
+            font-family: "calibri", sans-serif;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #7895B2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 12px; /* Add some spacing between the button and other elements */
+            border-radius: 10px; /* Add rounded edges */
+            margin-left: 20px; /* Add margin from the left edge of the page */
+        }
+    </style>
+    <script>
+        function redirectTowelcomepage() {
+            window.location.href = '/';
+        }
+    </script>
+</head>
+<body>
+    <div id="dashboard">
+        <h2><img src="https://cdn-icons-png.freepik.com/256/4768/4768801.png?ga=GA1.1.1617529639.1666296958&semt=ais" alt="Icon">Real Time Detection</h2>
+    </div>
+
+    <div id="content">
+        <div id="video">
+            <img id="video_feed" src="{{ url_for('video_feed') }}" alt="Live Camera">
+        </div>
+
+        <div id="information">
+            <p id="frame_counter">Frame Counter: 0</p>
+            <div id="person_without_epi_images"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('update_info', function (data) {
+                document.getElementById('information').innerText = data.data;
+                document.getElementById('frame_counter').innerText = 'Frame Counter: ' + data.frame_counter;
+
+                var personWithoutEPIImages = document.getElementById('person_without_epi_images');
+                personWithoutEPIImages.innerHTML = ''; // Clear previous images
+
+                if (data.person_without_epi_images && data.person_without_epi_images.length > 0) {
+                    data.person_without_epi_images.forEach(function (personImage) {
+                        var imageElement = document.createElement('img');
+                        imageElement.src = 'data:image/jpeg;base64,' + personImage;
+                        imageElement.className = 'person_image';
+                        personWithoutEPIImages.appendChild(imageElement);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
